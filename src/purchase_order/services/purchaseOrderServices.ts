@@ -2,6 +2,7 @@ import { PurchaseOrderRepository } from "../repositories/PurchaseOrderRepository
 import { PurchaseOrder } from "../models/PurchaseOrder";
 import { DateUtils } from "../../shared/utils/DateUtils";
 
+
 export class PurchaseOrderService {
 
     public static async getAllPurchaseOrders(): Promise<PurchaseOrder[]> {
@@ -19,6 +20,7 @@ export class PurchaseOrderService {
             throw new Error(`Error finding purchase order: ${error.message}`);
         }
     }
+
 
     public static async addPurchaseOrder(purchaseOrder: PurchaseOrder): Promise<PurchaseOrder> {
         try {
@@ -60,7 +62,7 @@ export class PurchaseOrderService {
             if (purchaseOrderData.updated_by !== undefined) {
                 purchaseOrderFound.updated_by = purchaseOrderData.updated_by;
             }
-           purchaseOrderFound.updated_at = DateUtils.formatDate(new Date());
+            purchaseOrderFound.updated_at = DateUtils.formatDate(new Date());
             if (purchaseOrderData.deleted !== undefined) {
                 purchaseOrderFound.deleted = purchaseOrderData.deleted;
             }

@@ -4,6 +4,7 @@ export interface Product{
     description: string ;
     price: number ;
     stock: number;
+    url:string;
     category_id_fk: number;
     created_at: string;
     created_by: string ;

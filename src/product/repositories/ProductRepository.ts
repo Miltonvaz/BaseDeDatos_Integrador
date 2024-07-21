@@ -124,15 +124,15 @@ export class ProductRepository {
             });
         });
     }
-
     public static async createProduct(product: Product): Promise<Product> {
-        const query = 'INSERT INTO product (name, description, price, stock, category_id_fk, created_at, created_by, updated_at, updated_by, deleted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        const query = 'INSERT INTO product (name, description, price, stock, url, category_id_fk, created_at, created_by, updated_at, updated_by, deleted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
         return new Promise((resolve, reject) => {
             connection.query(query, [
                 product.name,
                 product.description,
                 product.price,
                 product.stock,
+                product.url,
                 product.category_id_fk,
                 product.created_at,
                 product.created_by,
@@ -206,7 +206,7 @@ export class ProductRepository {
                     reject(error);
                 } else {
                     if ((result as ResultSetHeader).affectedRows > 0) {
-                        resolve(true);
+                        resolve(true);      
                     } else {
                         resolve(false);
                     }

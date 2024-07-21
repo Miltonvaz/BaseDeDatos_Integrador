@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { EventService } from '../service/calendarEventService';
+import { authorizeRole } from '../../shared/middlewares/auth'; 
 
 export const getAllEvents = async (_req: Request, res: Response) => {
     try {
@@ -26,6 +27,8 @@ export const getEventById = async (req: Request, res: Response) => {
 
 export const createEvent = async (req: Request, res: Response) => {
     try {
+        await authorizeRole(['Administrador'])(req, res, () => {});
+
         const newEvent = await EventService.addEvent(req.body);
         res.status(201).json(newEvent);
     } catch (error: any) {
@@ -35,6 +38,8 @@ export const createEvent = async (req: Request, res: Response) => {
 
 export const updateEvent = async (req: Request, res: Response) => {
     try {
+        await authorizeRole(['Administrador','Empleado'])(req, res, () => {});
+
         const eventId = parseInt(req.params.event_id, 10);
         const updatedEvent = await EventService.modifyEvent(eventId, req.body);
         if (updatedEvent) {
@@ -49,6 +54,8 @@ export const updateEvent = async (req: Request, res: Response) => {
 
 export const deleteEvent = async (req: Request, res: Response) => {
     try {
+        await authorizeRole(['Administrador','Empleado'])(req, res, () => {});
+
         const eventId = parseInt(req.params.event_id, 10);
         const deleted = await EventService.deleteEvent(eventId);
         if (deleted) {
@@ -63,6 +70,8 @@ export const deleteEvent = async (req: Request, res: Response) => {
 
 export const deleteLogicalEvent = async (req: Request, res: Response) => {
     try {
+        await authorizeRole(['Administrador','Empleado'])(req, res, () => {});
+
         const eventId = parseInt(req.params.event_id, 10);
         const success = await EventService.deleteEventLogic(eventId);
         if (success) {

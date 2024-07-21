@@ -52,17 +52,25 @@ export class ProductService {
         }
     }
 
-    public static async addProduct(product: Product): Promise<Product> {
-        try {
-            const currentDate = DateUtils.formatDate(new Date());
-            product.created_at = currentDate;
-            product.updated_at = currentDate;
-            return await ProductRepository.createProduct(product);
-        } catch (error: any) {
-            throw new Error(`Error creating product: ${error.message}`);
-        }
-    }
+        public static async addProduct(product: Product, file: Express.Multer.File): Promise<Product> {
+            try {
+              
+                const urlProject = process.env.BASE_URL || 'http://localhost'; 
+                const portProject = process.env.PORT || '3002'; 
 
+                product.url = `${urlProject}:${portProject}/uploads/${file.filename}`;
+        
+                product.created_at = DateUtils.formatDate(new Date());
+                product.updated_at = DateUtils.formatDate(new Date());
+                product.created_by = 'Usuario que crea el registro';
+                product.updated_by = 'Usuario que actualizó por última vez el registro';
+    
+                return await ProductRepository.createProduct(product);
+            } catch (error: any) {
+                throw new Error(`Error creating product: ${error.message}`);
+            }
+        }
+    
     public static async updateProduct(product_id: number, productData: Product): Promise<Product | null> {
         try {
             const currentDate =DateUtils.formatDate(new Date());

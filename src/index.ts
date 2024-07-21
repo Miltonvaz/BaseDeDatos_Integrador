@@ -10,16 +10,14 @@ import deliveryRoutes from './delivery/routes/deliveryRoutes';
 import roleRoutes from './role/routes/roleRoutes';
 import categoryRouters from './category/routes/categoryRoutes';
 import morgan from 'morgan';
-
 import cors from 'cors';
+import path from 'path';
 import statusRoutes from './status/routes/statusRoutes';
 import eventRoutes from './calendarEvent/routes/calendarEventRoutes';
 /*
 import https from 'https';
 import fs from 'fs';
 */
-
-
 dotenv.config();
 
 const app = express();
@@ -27,7 +25,7 @@ app.use(morgan('dev'))
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-/* CORS configuration
+/*
 const corsOptions = {
   origin: ['https://ferreteriaapi.integrador.xyz', 'https://ferreteria.integrador.xyz'],
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
@@ -35,11 +33,15 @@ const corsOptions = {
   optionsSuccessStatus: 204
 };
 */
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000',
+  methods: 'GET,POST',
+  allowedHeaders: 'Content-Type',
+}));
 
 app.get('/', (_req, res) => {
   res.send('Hola, mundo!');
-  });
+});
 
 app.use('/api/rol', roleRoutes);
 app.use('/api/users', userRoutes);
@@ -50,18 +52,20 @@ app.use('/api/deliverys', deliveryRoutes);
 app.use('/api/status', statusRoutes);
 app.use('/api/event', eventRoutes);
 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-// Route for testing CORS
 app.get('/', (_req, res) => {
   res.send('CORS configurado correctamente!');
 });
 
-const port = parseInt(process.env.PORT as string, 10) || 3000;
+const port = parseInt(process.env.PORT as string, 10) || 3002;
 
 app.listen(port, () => {
-  console.log(`Servidor corriendo en http://localhost:${port}`);
+  console.log('Serving static files from:', path.join(__dirname, '../uploads'));
+  console.log(`Servidor corriendo en:${port}`);
 });
 /*
 const options = {
@@ -69,7 +73,7 @@ const options = {
   cert: fs.readFileSync('fullchain.pem')
 };
 
-https.createServer(options, app).listen(PORT, () => {
-  console.log(`Servidor HTTPS corriendo en el puerto ${PORT}`);
+https.createServer(options, app).listen(port, () => {
+  console.log(`Servidor HTTPS corriendo en el puerto ${port}`);
 });
 */

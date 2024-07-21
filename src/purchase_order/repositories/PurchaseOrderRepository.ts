@@ -37,35 +37,72 @@ export class PurchaseOrderRepository {
     }
 
     public static async createPurchaseOrder(purchaseOrder: PurchaseOrder): Promise<PurchaseOrder> {
-        const query = 'INSERT INTO purchaseorder (date, total, product_id_fk, user_id_fk, street, city, status_id_fk, created_at, created_by, updated_at, updated_by, deleted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        const query = 'INSERT INTO purchaseorder (date, total, product_id_fk, user_id_fk, street, city, status_id_fk, cantidad, created_at, created_by, updated_at, updated_by, deleted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        const values = [
+            purchaseOrder.date,
+            purchaseOrder.total,
+            purchaseOrder.product_id_fk,
+            purchaseOrder.user_id_fk,
+            purchaseOrder.street,
+            purchaseOrder.city,
+            purchaseOrder.status_id_fk,
+            purchaseOrder.cantidad,
+            purchaseOrder.created_at,
+            purchaseOrder.created_by,
+            purchaseOrder.updated_at,
+            purchaseOrder.updated_by,
+            purchaseOrder.deleted ? 1 : 0
+        ];
+
         return new Promise((resolve, reject) => {
-            connection.query(query, [
-                purchaseOrder.date,
-                purchaseOrder.total,
-                purchaseOrder.product_id_fk,
-                purchaseOrder.user_id_fk,
-                purchaseOrder.street,
-                purchaseOrder.city,
-                purchaseOrder.status_id_fk,
-                purchaseOrder.created_at,
-                purchaseOrder.created_by,
-                purchaseOrder.updated_at,
-                purchaseOrder.updated_by,
-                purchaseOrder.deleted ? 1 : 0
-            ], (error, result) => {
-                if (error) {
-                    reject(error);
-                } else {
-                    const createdPurchaseOrderId = (result as ResultSetHeader).insertId;
-                    const createdPurchaseOrder: PurchaseOrder = { ...purchaseOrder, purchaseOrder_id: createdPurchaseOrderId };
-                    resolve(createdPurchaseOrder);
+            connection.beginTransaction((err) => {
+                if (err) {
+                    reject(err);
+                    return;
                 }
+
+                connection.query(query, values, (error, result) => {
+                    if (error) {
+                        connection.rollback(() => {
+                            reject(error);
+                        });
+                    } else {
+                        const createdPurchaseOrderId = (result as ResultSetHeader).insertId;
+                        const createdPurchaseOrder: PurchaseOrder = { ...purchaseOrder, purchaseOrder_id: createdPurchaseOrderId };
+
+                        // Insertar en la tabla pivote product_purchaseorder
+                        const pivotQuery = 'INSERT INTO product_purchaseorder (product_id, purchaseorder_id, cantidad) VALUES (?, ?, ?)';
+                        const pivotValues = [
+                            purchaseOrder.product_id_fk,
+                            createdPurchaseOrderId,
+                            purchaseOrder.cantidad
+                        ];
+
+                        connection.query(pivotQuery, pivotValues, (pivotError, _pivotResult) => {
+                            if (pivotError) {
+                                connection.rollback(() => {
+                                    reject(pivotError);
+                                });
+                            } else {
+                                connection.commit((commitError) => {
+                                    if (commitError) {
+                                        connection.rollback(() => {
+                                            reject(commitError);
+                                        });
+                                    } else {
+                                        resolve(createdPurchaseOrder);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
             });
         });
     }
 
     public static async updatePurchaseOrder(purchaseOrder_id: number, purchaseOrderData: PurchaseOrder): Promise<PurchaseOrder | null> {
-        const query = `UPDATE purchaseorder SET date = ?, total = ?, product_id_fk = ?, user_id_fk = ?, street = ?, city = ?, status_id_fk = ?, updated_at = ?, updated_by = ?, deleted = ? WHERE purchaseOrder_id = ?`;
+        const query = `UPDATE purchaseorder SET date = ?, total = ?, product_id_fk = ?, user_id_fk = ?, street = ?, city = ?, status_id_fk = ?, updated_at = ?, updated_by = ?, cantidad = ?, deleted = ? WHERE purchaseOrder_id = ?`;
         const values = [
             purchaseOrderData.date,
             purchaseOrderData.total,
@@ -76,6 +113,7 @@ export class PurchaseOrderRepository {
             purchaseOrderData.status_id_fk,
             purchaseOrderData.updated_at,
             purchaseOrderData.updated_by,
+            purchaseOrderData.cantidad,
             purchaseOrderData.deleted ? 1 : 0,
             purchaseOrder_id
         ];

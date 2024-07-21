@@ -33,8 +33,7 @@ export class UserService {
         } catch (error: any) {
             throw new Error(`Error al iniciar sesión: ${error.message}`);
         }
-    }
-
+    } 
     public static async getAllUsers(): Promise<User[]> {
         try {
             return await UserRepository.findAll();
@@ -61,7 +60,7 @@ export class UserService {
 
     public static async getAdministradores(): Promise<User[]> {
         try {
-            return await UserRepository.findAdministrador();
+            return await UserRepository.findAdministradores();
         } catch (error: any) {
             throw new Error(`Error al obtener administradores: ${error.message}`);
         }
@@ -75,18 +74,32 @@ export class UserService {
         }
     }
 
-    public static async addUser(user: User) {
-        try {
-            const salt = await bcrypt.genSalt(saltRounds);
-            user.created_at = DateUtils.formatDate(new Date());
-            user.updated_at = DateUtils.formatDate(new Date());
-            user.password = await bcrypt.hash(user.password, salt);
-            return await UserRepository.createUser(user);
-        } catch (error: any) {
-            throw new Error(`Error al crear usuario: ${error.message}`);
-        }
-    }
+   
 
+    public static async addUser(user: User,file: Express.Multer.File) {
+        const urlProject = process.env.URL;
+        const portProject = process.env.PORT;
+        try {
+
+                 user.url = `${urlProject}:${portProject}/uploads/${file.filename}`;
+                const salt = await bcrypt.genSalt(saltRounds);
+                user.password = await bcrypt.hash(user.password, salt);
+                user.created_at = DateUtils.formatDate(new Date());
+                user.updated_at = DateUtils.formatDate(new Date());
+                user.created_by = 'Usuario que crea el registro';
+                user.updated_by = 'Usuario que actualizó por última vez el registro';
+    
+    
+                console.log("Nombre del producto: "+user.first_name)
+                console.log("URL del producto: "+user.url)
+    
+                return await UserRepository.createUser(user);
+            } catch (error: any) {
+                throw new Error(`Error al crear producto: ${error.message}`);
+            }
+        }
+    
+    
     public static async modifyUser(userId: number, userData: User) {
         try {
             const userFound = await UserRepository.findById(userId);

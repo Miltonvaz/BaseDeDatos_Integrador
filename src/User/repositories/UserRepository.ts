@@ -31,7 +31,7 @@ export class UserRepository {
         });
     }
 
-    public static async findAdministrador(): Promise<User[]> {
+    public static async findAdministradores(): Promise<User[]> {
         const query = 'SELECT * FROM user WHERE deleted = 0 AND role_id_fk = 1';
         return new Promise((resolve, reject) => {
             connection.query(query, (error, results) => {
@@ -97,8 +97,8 @@ export class UserRepository {
 
     public static async createUser(user: User): Promise<User> {
         const { first_name, last_name, email, password, role_id_fk, created_at, created_by, updated_at, updated_by, deleted } = user;
-        const query = `INSERT INTO user (first_name, last_name, email, password, role_id_fk, created_at, created_by, updated_at, updated_by, deleted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-        const values = [first_name, last_name, email, password, role_id_fk, created_at, created_by, updated_at, updated_by, deleted ? 1 : 0];
+        const query = `INSERT INTO user (first_name, last_name, email, password, role_id_fk, created_at, created_by, updated_at, updated_by, deleted, url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+        const values = [first_name, last_name, email, password, role_id_fk, created_at, created_by, updated_at, updated_by, deleted ? 1 : 0, user.url];
 
         return new Promise((resolve, reject) => {
             connection.query(query, values, (error, result) => {
@@ -115,8 +115,8 @@ export class UserRepository {
 
     public static async updateUser(userId: number, userData: User): Promise<User | null> {
         const { first_name, last_name, email, password, role_id_fk, updated_at, updated_by, deleted } = userData;
-        const query = `UPDATE user SET first_name = ?, last_name = ?, email = ?, password = ?, role_id_fk = ?, updated_at = ?, updated_by = ?, deleted = ? WHERE user_id = ?`;
-        const values = [first_name, last_name, email, password, role_id_fk, updated_at, updated_by, deleted ? 1 : 0, userId];
+        const query = `UPDATE user SET first_name = ?, last_name = ?, email = ?, password = ?, role_id_fk = ?, updated_at = ?, updated_by = ?, deleted = ?, url = ? WHERE user_id = ?`;
+        const values = [first_name, last_name, email, password, role_id_fk, updated_at, updated_by, deleted ? 1 : 0, userData.url, userId];
 
         return new Promise((resolve, reject) => {
             connection.query(query, values, (error, result) => {
