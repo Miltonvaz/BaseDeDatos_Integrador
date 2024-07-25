@@ -1,10 +1,8 @@
-import { Request, Response} from "express";
+import { Request, Response } from "express";
 import { ProductService } from "../services/productService";
 import { Product } from "../models/Product";
-import { authorizeRole } from "../../shared/middlewares/auth"; 
 
 export class ProductController {
-
     public static async getAllProducts(_req: Request, res: Response): Promise<void> {
         try {
             const products: Product[] = await ProductService.getAllProducts();
@@ -66,28 +64,30 @@ export class ProductController {
 
     public static async addProduct(req: Request, res: Response): Promise<void> {
         try {
-            await authorizeRole(['Administrador','Empleado'])(req, res, () => {});
             const product = req.body;
             const file = req.file;
-
+    
             if (!file) {
                 res.status(400).json({ message: "Product image is required" });
                 return;
             }
-
+    
+            // Save the image URL in the product
+            product.imageUrl = `/uploads/${file.filename}`;
+    
             const newProduct = await ProductService.addProduct(product, file);
             res.status(201).json(newProduct);
         } catch (error: any) {
+            console.error('Error in addProduct:', error);
             res.status(500).json({ message: error.message });
         }
     }
 
     public static async updateProduct(req: Request, res: Response): Promise<void> {
         try {
-            await authorizeRole(['Administrador','Empleado'])(req, res, () => {}); 
             const product_id: number = parseInt(req.params.product_id);
             const productData: Product = req.body;
-
+    
             const updatedProduct: Product | null = await ProductService.updateProduct(product_id, productData);
             if (updatedProduct) {
                 res.status(200).json(updatedProduct);
@@ -101,9 +101,8 @@ export class ProductController {
 
     public static async deleteProduct(req: Request, res: Response): Promise<void> {
         try {
-            await authorizeRole(['Administrador','Empleado'])(req, res, () => {});
             const product_id: number = parseInt(req.params.product_id);
-
+    
             const success: boolean = await ProductService.deleteProduct(product_id);
             if (success) {
                 res.status(200).json({ message: "Product deleted successfully" });
@@ -117,9 +116,8 @@ export class ProductController {
 
     public static async deleteProductLogic(req: Request, res: Response): Promise<void> {
         try {
-            await authorizeRole(['Administrador','Empleado'])(req, res, () => {});
             const product_id: number = parseInt(req.params.product_id);
-
+    
             const success: boolean = await ProductService.deleteProductLogic(product_id);
             if (success) {
                 res.status(200).json({ message: "Product deleted logically" });

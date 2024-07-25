@@ -36,7 +36,7 @@ export class RoleRepository {
         });
     }
 
-    public static async findByName(name: string): Promise<Role | null> {
+    public static async findByRole(name: string): Promise<Role | null> {
         const query = "SELECT * FROM role WHERE name = ? AND deleted = 0";
         return new Promise((resolve, reject) => {
             connection.query(query, [name], (error, results) => {

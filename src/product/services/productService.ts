@@ -83,7 +83,7 @@ export class ProductService {
 
     public static async deleteProduct(product_id: number): Promise<boolean> {
         try {
-            return await ProductRepository.deleteUser(product_id);
+            return await ProductRepository.deleteProduct(product_id);
         } catch (error: any) {
             throw new Error(`Error deleting product: ${error.message}`);
         }

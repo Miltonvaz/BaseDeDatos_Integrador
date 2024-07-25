@@ -34,17 +34,19 @@ const corsOptions = {
 };
 */
 app.use(cors({
-  origin: 'http://localhost:3000',
-  methods: 'GET,POST',
-  allowedHeaders: 'Content-Type',
+  origin: 'http://localhost:3000', // La URL de tu frontend
+  methods: 'GET,POST,PUT,DELETE',
+  allowedHeaders: 'Content-Type,Authorization'
 }));
 
+// Resto de la configuración del servidor
+app.use(express.json());
+app.use('/api/users', userRoutes); 
 app.get('/', (_req, res) => {
   res.send('Hola, mundo!');
 });
 
 app.use('/api/rol', roleRoutes);
-app.use('/api/users', userRoutes);
 app.use('/api/products', productsRoutes);
 app.use("/api/categories", categoryRouters);
 app.use('/api/purchaseOrders', purchaseOrderRoutes);
@@ -52,7 +54,7 @@ app.use('/api/deliverys', deliveryRoutes);
 app.use('/api/status', statusRoutes);
 app.use('/api/event', eventRoutes);
 
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, '../src/uploads')));
 
 app.use(notFoundHandler);
 app.use(errorHandler);
@@ -64,7 +66,7 @@ app.get('/', (_req, res) => {
 const port = parseInt(process.env.PORT as string, 10) || 3002;
 
 app.listen(port, () => {
-  console.log('Serving static files from:', path.join(__dirname, '../uploads'));
+  console.log('Serving static files from:', path.join(__dirname, '../src/uploads'));
   console.log(`Servidor corriendo en:${port}`);
 });
 /*

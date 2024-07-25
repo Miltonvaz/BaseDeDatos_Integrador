@@ -18,11 +18,12 @@ export class UserService {
                 return null;
             }
             const passwordMatch = await bcrypt.compare(password, user.password);
-
+    
             if (!passwordMatch) {
                 return null;
             }
-
+    
+            // Incluye role_id_fk en el payload del token
             const payload = {
                 user_id: user.user_id,
                 role_id_fk: user.role_id_fk,
@@ -33,7 +34,8 @@ export class UserService {
         } catch (error: any) {
             throw new Error(`Error al iniciar sesión: ${error.message}`);
         }
-    } 
+    }
+     
     public static async getAllUsers(): Promise<User[]> {
         try {
             return await UserRepository.findAll();
@@ -76,30 +78,23 @@ export class UserService {
 
    
 
-    public static async addUser(user: User,file: Express.Multer.File) {
-        const urlProject = process.env.URL;
-        const portProject = process.env.PORT;
+    public static async addUser(user: User, file: Express.Multer.File) {
+        const urlProject = process.env.URL || 'http://localhost';
+        const portProject = process.env.PORT || 3002;
         try {
-
-                 user.url = `${urlProject}:${portProject}/uploads/${file.filename}`;
-                const salt = await bcrypt.genSalt(saltRounds);
-                user.password = await bcrypt.hash(user.password, salt);
-                user.created_at = DateUtils.formatDate(new Date());
-                user.updated_at = DateUtils.formatDate(new Date());
-                user.created_by = 'Usuario que crea el registro';
-                user.updated_by = 'Usuario que actualizó por última vez el registro';
+            const salt = await bcrypt.genSalt(saltRounds);
+            user.url = `${urlProject}:${portProject}/uploads/${file.filename}`;
+            user.password = await bcrypt.hash(user.password, salt);
+            user.created_at = DateUtils.formatDate(new Date());
+            user.updated_at = DateUtils.formatDate(new Date());
+            user.created_by = 'Usuario que crea el registro';
+            user.updated_by = 'Usuario que actualizó por última vez el registro';
     
-    
-                console.log("Nombre del producto: "+user.first_name)
-                console.log("URL del producto: "+user.url)
-    
-                return await UserRepository.createUser(user);
-            } catch (error: any) {
-                throw new Error(`Error al crear producto: ${error.message}`);
-            }
+            return await UserRepository.createUser(user);
+        } catch (error: any) {
+            throw new Error(`Error al crear usuario: ${error.message}`);
         }
-    
-    
+    }
     public static async modifyUser(userId: number, userData: User) {
         try {
             const userFound = await UserRepository.findById(userId);

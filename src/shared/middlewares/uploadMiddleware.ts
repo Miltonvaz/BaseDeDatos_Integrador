@@ -1,19 +1,17 @@
 import multer from 'multer';
+import path from 'path';
 
-// Configuración del almacenamiento
 const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => {
-    // Ruta donde se guardarán los archivos subidos
-    cb(null, 'uploads/');
-  },
-  filename: (_req, file, cb) => {
-    // Nombre del archivo guardado (se recomienda que sea único, por el Date.now().)
-    cb(null, `${Date.now()}-${file.originalname}`);
-  }
+    destination: function (_req, _file, cb) {
+        cb(null, path.join(__dirname, '../../uploads'));
+    },
+    filename: function (_req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
 });
 
-// Crea la instancia de multer con la configuración de almacenamiento
-const upload = multer({ storage });
+const upload = multer({ storage: storage });
 
-// Exporta el middleware para su uso en las rutas
 export default upload;
+    

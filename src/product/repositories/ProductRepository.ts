@@ -181,7 +181,7 @@ export class ProductRepository {
         });
     }
 
-    public static async deleteUser(product_id: number): Promise<boolean> {
+    public static async deleteProduct(product_id: number): Promise<boolean> {
         const query = 'DELETE FROM product WHERE product_id = ?';
         return new Promise((resolve, reject) => {
             connection.query(query, [product_id], (error, result) => {

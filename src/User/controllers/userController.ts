@@ -6,6 +6,7 @@ import { authorizeRole } from '../../shared/middlewares/auth';
 
 const secretKey = process.env.SECRET || '';
 
+
 export const loginUser = async (req: Request, res: Response) => {
     const { email, password } = req.body;
     try {
@@ -15,8 +16,14 @@ export const loginUser = async (req: Request, res: Response) => {
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
-        const payload = jwt.verify(token, secretKey) as { user_id: number };
-        return res.status(200).json({ token, user_id: payload.user_id });
+        // Decodifica el token para obtener el payload
+        const payload = jwt.verify(token, secretKey) as { user_id: number, role_id_fk: number };
+
+        return res.status(200).json({
+            token,
+            user_id: payload.user_id,
+            role: payload.role_id_fk // Incluye el role en la respuesta
+        });
     } catch (error: any) {
         console.error('Login error:', error);
         return res.status(500).json({ message: 'Internal server error' });
@@ -75,20 +82,26 @@ export const getClientes = async (_req: Request, res: Response) => {
 
 export const createUser = async (req: Request, res: Response) => {
     try {
-        const { email } = req.body;
+        const { email, password, first_name, last_name, role_id_fk } = req.body;
+
+        if (!email || !password || !first_name || !last_name || !role_id_fk) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
 
         const exists = await UserService.userExists(email);
         if (exists) {
             return res.status(409).json({ message: 'User already exists' });
         }
+
         if (!req.file) {
             return res.status(400).send('No file uploaded.');
         }
 
-        const newUser = await UserService.addUser(req.body, req.file)
+        const newUser = await UserService.addUser(req.body, req.file);
         return res.status(201).json(newUser);
     } catch (error: any) {
-        return res.status(500).json({ error: error.message });
+        console.error('Error en createUser:', error);
+        return res.status(500).json({ message: `Error al crear usuario: ${error.message}` });
     }
 };
 

@@ -40,7 +40,7 @@ export class PurchaseOrderService {
                 throw new Error(`Purchase order with ID ${purchaseOrder_id} not found.`);
             }
 
-            // Actualización de campos
+        
             if (purchaseOrderData.date !== undefined) {
                 purchaseOrderFound.date = purchaseOrderData.date;
             }

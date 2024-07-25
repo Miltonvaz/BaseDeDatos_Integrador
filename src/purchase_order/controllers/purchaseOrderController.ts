@@ -28,7 +28,7 @@ export const getPurchaseOrderById = async (req: Request, res: Response): Promise
     }
 };
 
-export const createPurchaseOrder = [authorizeRole(['Administrador', 'Empleado']), async (req: Request, res: Response): Promise<Response> => {
+export const createPurchaseOrder = [authorizeRole(['Administrador', 'Empleado', 'Usuario']), async (req: Request, res: Response): Promise<Response> => {
     try {
         const { products, user_id_fk, street, city } = req.body;
 
@@ -73,7 +73,7 @@ export const createPurchaseOrder = [authorizeRole(['Administrador', 'Empleado'])
             purchaseOrder_id: null,
             date: DateUtils.formatDate(new Date()),
             total: total,
-            product_id_fk: products[0].id, 
+            product_id_fk: products[0].id,
             user_id_fk: user_id_fk,
             street: street,
             city: city,

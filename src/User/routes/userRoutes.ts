@@ -6,15 +6,16 @@ const userRoutes: Router = Router();
 
 userRoutes.post('/login', loginUser);
 
-// Las rutas que requieren autenticación y autorización
+
 userRoutes.get('/', authMiddleware, getAllUsers);
 userRoutes.get('/empleados', authMiddleware, getEmpleados);
 userRoutes.get('/administradores', authMiddleware, getAdministradores);
 userRoutes.get('/clientes', authMiddleware,  getClientes);
-userRoutes.get('/:user_id', authMiddleware, getUserById);
+userRoutes.get('/:u ser_id', authMiddleware, getUserById);
 userRoutes.put('/:user_id', authMiddleware, authorizeRole(['Administrador', 'Empleado']), updateUser);
 userRoutes.put('/deleted/:user_id', authMiddleware, authorizeRole(['Administrador', 'Empleado']), deleteLogicalUser);
 userRoutes.delete('/:user_id', authMiddleware, authorizeRole(['Administrador', 'Empleado']), deleteUser);
-userRoutes.post('/', upload.single('productImage'), createUser);
+userRoutes.post('/', upload.single('userImage'), createUser);
+
 
 export default userRoutes;

@@ -6,9 +6,9 @@ const eventRoutes: Router = Router();
 
 eventRoutes.get('/', getAllEvents);
 eventRoutes.get('/:event_id', getEventById);
-eventRoutes.post('/',  authorizeRole(['Administrador','Empleado']),authMiddleware,createEvent);
-eventRoutes.put('/:event_id', authorizeRole(['Administrador','Empleado']),authMiddleware, updateEvent);
-eventRoutes.delete('/:event_id',  authorizeRole(['Administrador','Empleado']),authMiddleware,deleteEvent);
-eventRoutes.put('/deleted/:event_id', authorizeRole(['Administrador','Empleado']),authMiddleware, deleteLogicalEvent);
+eventRoutes.post('/',authMiddleware, authorizeRole(['Administrador','Empleado']),createEvent);
+eventRoutes.put('/:event_id',authMiddleware, authorizeRole(['Administrador','Empleado']), updateEvent);
+eventRoutes.delete('/:event_id',authMiddleware,  authorizeRole(['Administrador','Empleado']),deleteEvent);
+eventRoutes.put('/deleted/:event_id',authMiddleware, authorizeRole(['Administrador','Empleado']), deleteLogicalEvent);
 
 export default eventRoutes;

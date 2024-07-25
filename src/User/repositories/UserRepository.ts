@@ -76,6 +76,7 @@ export class UserRepository {
             });
         });
     }
+    
 
     public static async findByEmail(email: string): Promise<User | null> {
         const query = 'SELECT * FROM user WHERE email = ? AND deleted = 0';
@@ -94,12 +95,11 @@ export class UserRepository {
             });
         });
     }
-
     public static async createUser(user: User): Promise<User> {
         const { first_name, last_name, email, password, role_id_fk, created_at, created_by, updated_at, updated_by, deleted } = user;
         const query = `INSERT INTO user (first_name, last_name, email, password, role_id_fk, created_at, created_by, updated_at, updated_by, deleted, url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
         const values = [first_name, last_name, email, password, role_id_fk, created_at, created_by, updated_at, updated_by, deleted ? 1 : 0, user.url];
-
+    
         return new Promise((resolve, reject) => {
             connection.query(query, values, (error, result) => {
                 if (error) {
@@ -112,12 +112,12 @@ export class UserRepository {
             });
         });
     }
-
+    
     public static async updateUser(userId: number, userData: User): Promise<User | null> {
         const { first_name, last_name, email, password, role_id_fk, updated_at, updated_by, deleted } = userData;
         const query = `UPDATE user SET first_name = ?, last_name = ?, email = ?, password = ?, role_id_fk = ?, updated_at = ?, updated_by = ?, deleted = ?, url = ? WHERE user_id = ?`;
         const values = [first_name, last_name, email, password, role_id_fk, updated_at, updated_by, deleted ? 1 : 0, userData.url, userId];
-
+    
         return new Promise((resolve, reject) => {
             connection.query(query, values, (error, result) => {
                 if (error) {
@@ -132,6 +132,7 @@ export class UserRepository {
             });
         });
     }
+    
 
     public static async deleteUser(userId: number): Promise<boolean> {
         const query = `DELETE FROM user WHERE user_id = ?`;
