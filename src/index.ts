@@ -17,6 +17,7 @@ import eventRoutes from './calendarEvent/routes/calendarEventRoutes';
 
 import https from 'https';
 import fs from 'fs';
+import http from 'http';
 
 dotenv.config();
 
@@ -56,19 +57,21 @@ app.get('/', (_req, res) => {
   res.send('CORS configurado correctamente!');
 });
 
-const port = parseInt(process.env.PORT as string, 10) || 3002;
+const httpPort = 3000;
+const httpsPort = 3443;
 
-app.listen(port, () => {
-  console.log('Serving static files from:', path.join(__dirname, '../src/uploads'));
-  console.log(`Servidor corriendo en:${port}`);
+const httpServer = http.createServer(app);
+httpServer.listen(httpPort, () => {
+  console.log(`Servidor HTTP corriendo en el puerto ${httpPort}`);
 });
 
-const options = {
+
+const httpsOptions = {
   key: fs.readFileSync('privkey.pem'),
   cert: fs.readFileSync('fullchain.pem')
 };
 
-https.createServer(options, app).listen(port, () => {
-  console.log(`Servidor HTTPS corriendo en el puerto ${port}`);
+const httpsServer = https.createServer(httpsOptions, app);
+httpsServer.listen(httpsPort, () => {
+  console.log(`Servidor HTTPS corriendo en el puerto ${httpsPort}`);
 });
-
