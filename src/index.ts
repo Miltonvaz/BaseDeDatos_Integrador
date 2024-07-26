@@ -53,10 +53,9 @@ app.use(errorHandler);
 
 const port = parseInt(process.env.PORT as string, 10) || 3000;
 
-
 const options = {
-  key: fs.readFileSync('privkey.pem'),
-  cert: fs.readFileSync('fullchain.pem')
+  key: fs.readFileSync(path.join(__dirname, '../src/privkey.pem')),
+  cert: fs.readFileSync(path.join(__dirname, '../src/fullchain.pem'))
 };
 
 https.createServer(options, app).listen(port, () => {
