@@ -108,7 +108,7 @@ export class UserRepository {
                     const createUserId = (result as any).insertId;
                     const createdUser: User = { ...user, user_id: createUserId };
                     resolve(createdUser);
-                }
+                }   
             });
         });
     }
