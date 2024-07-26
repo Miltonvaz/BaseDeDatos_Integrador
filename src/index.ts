@@ -16,6 +16,7 @@ import eventRoutes from './calendarEvent/routes/calendarEventRoutes';
 import https from 'https';
 import fs from 'fs';
 
+
 dotenv.config();
 
 const app = express();
@@ -51,11 +52,12 @@ app.use('/uploads', express.static(path.join(__dirname, '../src/uploads')));
 app.use(notFoundHandler);
 app.use(errorHandler);
 
+
 const port = parseInt(process.env.PORT as string, 10) || 3000;
 
 const options = {
-  key: fs.readFileSync(path.join(__dirname, '../src/privkey.pem')),
-  cert: fs.readFileSync(path.join(__dirname, '../src/fullchain.pem'))
+  key: fs.readFileSync(path.join(__dirname, 'privkey.pem')),
+  cert: fs.readFileSync(path.join(__dirname, 'fullchain.pem'))
 };
 
 https.createServer(options, app).listen(port, () => {
