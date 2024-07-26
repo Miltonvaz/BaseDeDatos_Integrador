@@ -72,7 +72,7 @@ app.use(errorHandlers_1.errorHandler);
 app.get('/', (_req, res) => {
     res.send('CORS configurado correctamente!');
 });
-const port = parseInt(process.env.PORT, 10) || 3002;
+const port = parseInt(process.env.PORT, 10) || 3000;
 app.listen(port, () => {
     console.log('Serving static files from:', path_1.default.join(__dirname, '../src/uploads'));
     console.log(`Servidor corriendo en:${port}`);
