@@ -16,7 +16,6 @@ import eventRoutes from './calendarEvent/routes/calendarEventRoutes';
 import https from 'https';
 import fs from 'fs';
 
-
 dotenv.config();
 
 const app = express();
@@ -53,12 +52,15 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 
+
+
 const port = parseInt(process.env.PORT as string, 10) || 3000;
 
 const options = {
-  key: fs.readFileSync(path.join(__dirname, 'privkey.pem')),
-  cert: fs.readFileSync(path.join(__dirname, 'fullchain.pem'))
+key: fs.readFileSync('privkey.pem'),
+cert: fs.readFileSync('fullchain.pem')
 };
+
 
 https.createServer(options, app).listen(port, () => {
   console.log('Serving static files from:', path.join(__dirname, '../src/uploads'));
