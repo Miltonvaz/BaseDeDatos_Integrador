@@ -1,0 +1,22 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const productController_1 = require("../controllers/productController");
+const uploadMiddleware_1 = __importDefault(require("../../shared/middlewares/uploadMiddleware"));
+const auth_1 = require("../../shared/middlewares/auth");
+const auth_2 = require("../../shared/middlewares/auth");
+const productsRoutes = express_1.default.Router();
+productsRoutes.get("/", productController_1.ProductController.getAllProducts);
+productsRoutes.get("/manuales", productController_1.ProductController.getProductManuales);
+productsRoutes.get("/electricos", productController_1.ProductController.getProductElectricos);
+productsRoutes.get("/construccion", productController_1.ProductController.getProductConstruccion);
+productsRoutes.get("/othermore", productController_1.ProductController.getProductOtherMore);
+productsRoutes.get("/:product_id", productController_1.ProductController.getProductById);
+productsRoutes.post("/", auth_1.authMiddleware, uploadMiddleware_1.default.single('productImage'), productController_1.ProductController.addProduct);
+productsRoutes.put("/:product_id", auth_1.authMiddleware, (0, auth_2.authorizeRole)(['Administrator', 'Employee']), productController_1.ProductController.updateProduct);
+productsRoutes.delete("/:product_id", auth_1.authMiddleware, (0, auth_2.authorizeRole)(['Administrator', 'Employee']), productController_1.ProductController.deleteProduct);
+productsRoutes.put("/logic/:product_id", auth_1.authMiddleware, (0, auth_2.authorizeRole)(['Administrator', 'Employee']), productController_1.ProductController.deleteProductLogic);
+exports.default = productsRoutes;

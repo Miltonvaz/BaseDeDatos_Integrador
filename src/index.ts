@@ -11,6 +11,10 @@ import categoryRouters from './category/routes/categoryRoutes';
 import morgan from 'morgan';
 import cors from 'cors';
 import path from 'path';
+
+import https from 'https';
+import fs from 'fs';
+
 import statusRoutes from './status/routes/statusRoutes';
 import eventRoutes from './calendarEvent/routes/calendarEventRoutes';
 
@@ -44,8 +48,24 @@ app.use('/api/event', eventRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-const port = 3002;
 
+
+
+const port = parseInt(process.env.PORT as string, 10) || 3000;
+
+const options = {
+key: fs.readFileSync('privkey.pem'),
+cert: fs.readFileSync('fullchain.pem')
+};
+
+
+https.createServer(options, app).listen(port, () => {
+  console.log('Serving static files from:', path.join(__dirname, '../dist/uploads'));
+  console.log(`Servidor HTTPS corriendo en el puerto ${port}`);
+});
+
+/*
 app.listen(port, () => {
   console.log(`Servidor HTTP corriendo en el puerto ${port}`);
 });
+*/
