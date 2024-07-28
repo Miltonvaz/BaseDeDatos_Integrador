@@ -10,8 +10,6 @@ import roleRoutes from './role/routes/roleRoutes';
 import categoryRouters from './category/routes/categoryRoutes';
 import morgan from 'morgan';
 import cors from 'cors';
-import path from 'path';
-
 import https from 'https';
 import fs from 'fs';
 
@@ -34,9 +32,10 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
+// Servir archivos estáticos desde /var/www/html/uploads
+app.use('/uploads', express.static('/var/www/html/uploads'));
 
-app.use('/uploads', express.static(path.join(__dirname, '../dist/uploads')));
-
+// Rutas de la API
 app.use('/api/users', userRoutes);
 app.use('/api/rol', roleRoutes);
 app.use('/api/products', productsRoutes);
@@ -45,27 +44,18 @@ app.use('/api/purchaseOrders', purchaseOrderRoutes);
 app.use('/api/status', statusRoutes);
 app.use('/api/event', eventRoutes);
 
+// Manejo de errores
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-
-
-
+// Configuración del servidor HTTPS
 const port = parseInt(process.env.PORT as string, 10) || 3000;
 
 const options = {
-key: fs.readFileSync('privkey.pem'),
-cert: fs.readFileSync('fullchain.pem')
+  key: fs.readFileSync('privkey.pem'),
+  cert: fs.readFileSync('fullchain.pem')
 };
 
-
 https.createServer(options, app).listen(port, () => {
-  console.log('Serving static files from:', path.join(__dirname, '../dist/uploads'));
   console.log(`Servidor HTTPS corriendo en el puerto ${port}`);
 });
-
-/*
-app.listen(port, () => {
-  console.log(`Servidor HTTP corriendo en el puerto ${port}`);
-});
-*/
