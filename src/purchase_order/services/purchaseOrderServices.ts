@@ -39,8 +39,6 @@ export class PurchaseOrderService {
             if (!purchaseOrderFound) {
                 throw new Error(`Purchase order with ID ${purchaseOrder_id} not found.`);
             }
-
-        
             if (purchaseOrderData.date !== undefined) {
                 purchaseOrderFound.date = purchaseOrderData.date;
             }

@@ -10,11 +10,8 @@ import roleRoutes from './role/routes/roleRoutes';
 import categoryRouters from './category/routes/categoryRoutes';
 import morgan from 'morgan';
 import cors from 'cors';
-import path from 'path';
 import statusRoutes from './status/routes/statusRoutes';
 import eventRoutes from './calendarEvent/routes/calendarEventRoutes';
-import https from 'https';
-import fs from 'fs';
 
 dotenv.config();
 
@@ -33,7 +30,7 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.use(express.json());
-app.use('/api/users', userRoutes); 
+app.use('/api/users', userRoutes);
 
 app.get('/', (_req, res) => {
   res.send('Hola, mundo!');
@@ -46,14 +43,13 @@ app.use('/api/purchaseOrders', purchaseOrderRoutes);
 app.use('/api/status', statusRoutes);
 app.use('/api/event', eventRoutes);
 
-app.use('/uploads', express.static(path.join(__dirname, '../src/uploads')));
+// Ajusta la ruta para servir archivos estáticos
+app.use('/uploads', express.static('/api/BaseDeDatos_Integrador/dist/uploads'));
 
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-
-
-
+/*
 const port = parseInt(process.env.PORT as string, 10) || 3000;
 
 const options = {
@@ -61,8 +57,8 @@ key: fs.readFileSync('privkey.pem'),
 cert: fs.readFileSync('fullchain.pem')
 };
 
-
 https.createServer(options, app).listen(port, () => {
   console.log('Serving static files from:', path.join(__dirname, '../src/uploads'));
   console.log(`Servidor HTTPS corriendo en el puerto ${port}`);
 });
+*/
