@@ -51,6 +51,7 @@ export class ProductService {
             throw new Error(`Error finding product: ${error.message}`);
         }
     }
+    
     public static async addProduct(product: Product, file: Express.Multer.File): Promise<Product> {
         try {
             const urlProject = process.env.URL || 'https://ferreteriaapi.integrador.xyz'; 
