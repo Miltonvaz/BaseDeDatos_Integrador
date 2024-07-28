@@ -98,6 +98,7 @@ export const createUser = async (req: Request, res: Response) => {
         }
 
         const newUser = await UserService.addUser(req.body, req.file);
+        console.log(newUser.url);
         return res.status(201).json(newUser);
     } catch (error: any) {
         console.error('Error en createUser:', error);

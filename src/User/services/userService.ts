@@ -79,11 +79,10 @@ export class UserService {
    
 
     public static async addUser(user: User, file: Express.Multer.File) {
-        const urlProject = process.env.URL || 'http://localhost';
-        const portProject = process.env.PORT || 3002;
+        const urlProject = process.env.BASE_URL || 'http://localhost'; 
         try {
             const salt = await bcrypt.genSalt(saltRounds);
-            user.url = `${urlProject}:${portProject}/uploads/${file.filename}`;
+            user.url = `${urlProject}/uploads/${file.filename}`;
             user.password = await bcrypt.hash(user.password, salt);
             user.created_at = DateUtils.formatDate(new Date());
             user.updated_at = DateUtils.formatDate(new Date());
@@ -95,6 +94,10 @@ export class UserService {
             throw new Error(`Error al crear usuario: ${error.message}`);
         }
     }
+    
+    
+    
+    
     public static async modifyUser(userId: number, userData: User) {
         try {
             const userFound = await UserRepository.findById(userId);
@@ -117,6 +120,9 @@ export class UserService {
                 }
                 if (userData.updated_by) {
                     userFound.updated_by = userData.updated_by;
+                }
+                if(userData.url){
+                    userFound.url = userData.url;
                 }
                 if (userData.deleted !== undefined) {
                     userFound.deleted = userData.deleted;

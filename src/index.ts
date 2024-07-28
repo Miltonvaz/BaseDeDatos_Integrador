@@ -14,10 +14,6 @@ import path from 'path';
 import statusRoutes from './status/routes/statusRoutes';
 import eventRoutes from './calendarEvent/routes/calendarEventRoutes';
 
-import https from 'https';
-import fs from 'fs';
-
-
 dotenv.config();
 
 const app = express();
@@ -34,13 +30,10 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-app.use(express.json());
-app.use('/api/users', userRoutes); 
 
-app.get('/', (_req, res) => {
-  res.send('Hola, mundo!');
-});
+app.use('/uploads', express.static(path.join(__dirname, '../dist/uploads')));
 
+app.use('/api/users', userRoutes);
 app.use('/api/rol', roleRoutes);
 app.use('/api/products', productsRoutes);
 app.use('/api/categories', categoryRouters);
@@ -48,23 +41,11 @@ app.use('/api/purchaseOrders', purchaseOrderRoutes);
 app.use('/api/status', statusRoutes);
 app.use('/api/event', eventRoutes);
 
-app.use('/uploads', express.static(path.join(__dirname, '../src/uploads')));
-
 app.use(notFoundHandler);
 app.use(errorHandler);
 
+const port = 3002;
 
-
-
-const port = parseInt(process.env.PORT as string, 10) || 3000;
-
-const options = {
-key: fs.readFileSync('privkey.pem'),
-cert: fs.readFileSync('fullchain.pem')
-};
-
-
-https.createServer(options, app).listen(port, () => {
-  console.log('Serving static files from:', path.join(__dirname, '../src/uploads'));
-  console.log(`Servidor HTTPS corriendo en el puerto ${port}`);
+app.listen(port, () => {
+  console.log(`Servidor HTTP corriendo en el puerto ${port}`);
 });
