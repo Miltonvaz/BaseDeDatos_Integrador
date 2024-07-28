@@ -42,7 +42,6 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
     return res.status(401).json({ message: errorMessages.unauthorized });
   }
 };
-
 export const authorizeRole = (allowedRoles: string[]) => {
   return async (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.userData) {
@@ -60,11 +59,17 @@ export const authorizeRole = (allowedRoles: string[]) => {
 
       const userRoleName = getUserRoleName(user.role_id_fk);
 
-      if (!userRoleName || !allowedRoles.includes(userRoleName)) {
+      if (!userRoleName) {
+        console.log('Invalid user role:', user.role_id_fk);
+        return res.status(403).json({ message: 'Forbidden' });
+      }
+
+      if (!allowedRoles.includes(userRoleName)) {
         console.log('User role:', userRoleName, 'Allowed roles:', allowedRoles);
         return res.status(403).json({ message: 'Forbidden' });
       }
 
+      console.log('Authorization successful for role:', userRoleName);
       return next();
     } catch (error) {
       console.log('Authorization error:', error);
@@ -72,6 +77,8 @@ export const authorizeRole = (allowedRoles: string[]) => {
     }
   };
 };
+
+
 
 function getUserRoleName(role_id_fk?: number): string | null {
   if (role_id_fk === undefined) {
@@ -83,7 +90,7 @@ function getUserRoleName(role_id_fk?: number): string | null {
     case 2:
       return 'Empleado';
     case 3:
-      return 'Usuario';
+      return 'User';
     default:
       return null;
   }

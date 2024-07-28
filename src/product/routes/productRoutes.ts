@@ -14,8 +14,8 @@ productsRoutes.get("/othermore", ProductController.getProductOtherMore);
 productsRoutes.get("/:product_id", ProductController.getProductById);
 
 productsRoutes.post("/", authMiddleware, upload.single('productImage'), ProductController.addProduct);
-productsRoutes.put("/:product_id", authMiddleware, authorizeRole(['Administrator', 'Employee']), ProductController.updateProduct);
-productsRoutes.delete("/:product_id", authMiddleware, authorizeRole(['Administrator', 'Employee']), ProductController.deleteProduct);
-productsRoutes.put("/logic/:product_id", authMiddleware, authorizeRole(['Administrator', 'Employee']), ProductController.deleteProductLogic);
+productsRoutes.put("/:product_id", authMiddleware, authorizeRole(['Administrador', 'Empleado']), ProductController.updateProduct);
+productsRoutes.delete("/:product_id", authMiddleware, authorizeRole(['Administrador', 'Empleado']), ProductController.deleteProduct);
+productsRoutes.put("/logic/:product_id", authMiddleware, authorizeRole(['Administrador', 'Empleado']), ProductController.deleteProductLogic);
 
 export default productsRoutes;
