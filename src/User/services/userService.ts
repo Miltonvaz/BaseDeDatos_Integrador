@@ -79,7 +79,7 @@ export class UserService {
     public static async addUser(user: User, file: Express.Multer.File) {
         try {
             const salt = await bcrypt.genSalt(saltRounds);
-            user.url = `${urlProject}/uploads/${file.filename}`;
+            user.url = `${urlProject}/uploads/${file.filename}`.replace(/([^:]\/)\/+/g, "$1"); // Asegura que no haya doble '/'
             user.password = await bcrypt.hash(user.password, salt);
             user.created_at = DateUtils.formatDate(new Date());
             user.updated_at = DateUtils.formatDate(new Date());
@@ -116,7 +116,7 @@ export class UserService {
                     userFound.updated_by = userData.updated_by;
                 }
                 if (userData.url) {
-                    userFound.url = `${urlProject}/uploads/${userData.url}`;
+                    userFound.url = `${urlProject}/uploads/${userData.url}`.replace(/([^:]\/)\/+/g, "$1"); // Asegura que no haya doble '/'
                 }
                 if (userData.deleted !== undefined) {
                     userFound.deleted = userData.deleted;
