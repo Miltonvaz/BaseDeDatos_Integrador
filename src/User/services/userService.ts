@@ -79,7 +79,7 @@ export class UserService {
     public static async addUser(user: User, file: Express.Multer.File) {
         try {
             const salt = await bcrypt.genSalt(saltRounds);
-            user.url = `${urlProject}/uploads/${file.filename}`.replace(/\/{2,}/g, '/'); 
+            user.url = `${urlProject}/uploads/${file.filename}`; 
             user.password = await bcrypt.hash(user.password, salt);
             user.created_at = DateUtils.formatDate(new Date());
             user.updated_at = DateUtils.formatDate(new Date());
