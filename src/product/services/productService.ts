@@ -53,13 +53,13 @@ export class ProductService {
     }
     public static async addProduct(product: Product, file: Express.Multer.File): Promise<Product> {
         try {
-            const urlProject = process.env.BASE_URL || 'http://localhost'; 
+            const urlProject = process.env.URL || 'https://ferreteriaapi.integrador.xyz'; 
     
             product.url = `${urlProject}/uploads/${file.filename}`;
             product.created_at = DateUtils.formatDate(new Date());
             product.updated_at = DateUtils.formatDate(new Date());
             product.created_by = 'Usuario que crea el registro';
-            product.updated_by = 'Usuario que actualizó por última vez el registro';
+            product.updated_by = 'Usuario que actualizó por última vez el registro';    
     
             return await ProductRepository.createProduct(product);
         } catch (error: any) {
