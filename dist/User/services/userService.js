@@ -21,6 +21,7 @@ const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const secretKey = process.env.SECRET || '';
 const saltRounds = 10;
+const urlProject = process.env.URL || 'http://localhost';
 class UserService {
     static login(email, password) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -33,7 +34,6 @@ class UserService {
                 if (!passwordMatch) {
                     return null;
                 }
-                // Incluye role_id_fk en el payload del token
                 const payload = {
                     user_id: user.user_id,
                     role_id_fk: user.role_id_fk,
@@ -99,7 +99,6 @@ class UserService {
     }
     static addUser(user, file) {
         return __awaiter(this, void 0, void 0, function* () {
-            const urlProject = process.env.BASE_URL || 'http://localhost';
             try {
                 const salt = yield bcrypt_1.default.genSalt(saltRounds);
                 user.url = `${urlProject}/uploads/${file.filename}`;
@@ -140,7 +139,7 @@ class UserService {
                         userFound.updated_by = userData.updated_by;
                     }
                     if (userData.url) {
-                        userFound.url = userData.url;
+                        userFound.url = `${urlProject}/uploads/${userData.url}`;
                     }
                     if (userData.deleted !== undefined) {
                         userFound.deleted = userData.deleted;
