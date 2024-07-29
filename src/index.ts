@@ -24,18 +24,18 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 const corsOptions = {
-  origin: ['https://ferreteriaapi.integrador.xyz', 'http://localhost:3000'],
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  origin: ['https://ferreteria.integrador.xyz', 'http://localhost:3000'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true,
+  allowedHeaders: ['Content-Type', 'Authorization'],
   optionsSuccessStatus: 204
 };
 
 app.use(cors(corsOptions));
 
-// Servir archivos estáticos desde /var/www/html/uploads
 app.use('/uploads', express.static('/var/www/html/uploads'));
 
-// Rutas de la API
+
 app.use('/api/users', userRoutes);
 app.use('/api/rol', roleRoutes);
 app.use('/api/products', productsRoutes);
@@ -44,11 +44,10 @@ app.use('/api/purchaseOrders', purchaseOrderRoutes);
 app.use('/api/status', statusRoutes);
 app.use('/api/event', eventRoutes);
 
-// Manejo de errores
+
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-// Configuración del servidor HTTPS
 const port = parseInt(process.env.PORT as string, 10) || 3000;
 
 const options = {
