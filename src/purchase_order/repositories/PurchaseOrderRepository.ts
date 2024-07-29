@@ -150,8 +150,66 @@ export class PurchaseOrderRepository {
             });
         });
     }
-
-    public static async deletePurchaseOrderLogic(purchaseOrder_id: number): Promise<boolean> {
+   
+    
+    public static async getMostSoldProducts(): Promise<{ product_id: number, name: string, total_sold: number }[]> {
+        const query = `
+            SELECT p.product_id, p.name, SUM(po.cantidad) AS total_sold
+            FROM product p
+            JOIN purchaseorder po ON p.product_id = po.product_id_fk
+            WHERE po.deleted = 0
+            GROUP BY p.product_id, p.name
+            ORDER BY total_sold DESC;
+        `;
+    
+        return new Promise((resolve, reject) => {
+            connection.query(query, (error, results) => {
+                if (error) {
+                    console.error("SQL Error:", error);
+                    return reject(new Error(`SQL Error: ${error.message}`));
+                }
+                console.log("SQL Results:", results);
+    
+                if (!Array.isArray(results)) {
+                    return reject(new Error('Unexpected result format'));
+                }
+    
+                try {
+                    const formattedResults = results.map((row: any) => {
+                        if (typeof row === 'object' && row !== null) {
+                            const { product_id, name, total_sold } = row;
+    
+                            // Convert total_sold to number
+                            const totalSoldNumber = Number(total_sold);
+    
+                            if (typeof product_id === 'number' && !isNaN(product_id) &&
+                                typeof name === 'string' && name.trim() !== '' &&
+                                typeof totalSoldNumber === 'number' && !isNaN(totalSoldNumber)) {
+                                return {
+                                    product_id,
+                                    name,
+                                    total_sold: totalSoldNumber
+                                };
+                            } else {
+                                console.error("Invalid data format:", row);
+                                throw new Error('Invalid data format');
+                            }
+                        } else {
+                            console.error("Unexpected row format:", row);
+                            throw new Error('Unexpected row format');
+                        }
+                    });
+    
+                    console.log("Formatted Results:", formattedResults);
+                    resolve(formattedResults);
+                } catch (validationError) {
+                    console.error("Validation Error:", validationError);
+                    reject(validationError);
+                }
+            });
+        });
+    }
+        public static async deletePurchaseOrderLogic(purchaseOrder_id: number): Promise<boolean> {
         const query = 'UPDATE purchaseorder SET deleted = 1 WHERE purchaseOrder_id = ?';
         return new Promise((resolve, reject) => {
             connection.query(query, [purchaseOrder_id], (error, result) => {

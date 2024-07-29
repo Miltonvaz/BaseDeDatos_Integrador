@@ -1,6 +1,7 @@
 import { ProductRepository } from "../repositories/ProductRepository";
 import { Product } from "../models/Product";
 import { DateUtils } from "../../shared/utils/DateUtils";
+import { PurchaseOrderRepository } from "../../purchase_order/repositories/PurchaseOrderRepository";
 
 export class ProductService {
 
@@ -78,18 +79,27 @@ export class ProductService {
             throw new Error(`Error updating product: ${error.message}`);
         }
     }
-
-    public static async deleteProduct(product_id: number): Promise<boolean> {
+   
+    public static async getMostSoldProducts() {
         try {
-            return await ProductRepository.deleteProduct(product_id);
+            const products = await PurchaseOrderRepository.getMostSoldProducts();
+            return products;
+        } catch (error: any) {
+            throw new Error(`Error finding most sold products: ${error.message}`);
+        }
+    }
+    
+    
+    public static async deleteProductLogic(product_id: number): Promise<boolean> {
+        try {
+            return await ProductRepository.deleteProductLogic(product_id);
         } catch (error: any) {
             throw new Error(`Error deleting product: ${error.message}`);
         }
     }
-
-    public static async deleteProductLogic(product_id: number): Promise<boolean> {
+    public static async deleteProduct(product_id: number): Promise<boolean> {
         try {
-            return await ProductRepository.deleteProductLogic(product_id);
+            return await ProductRepository.deleteProduct(product_id);
         } catch (error: any) {
             throw new Error(`Error deleting product: ${error.message}`);
         }
