@@ -1,10 +1,9 @@
 import { PurchaseOrderRepository } from "../repositories/PurchaseOrderRepository";
 import { PurchaseOrder } from "../models/PurchaseOrder";
 import { DateUtils } from "../../shared/utils/DateUtils";
-
+import { Request, Response } from 'express';
 
 export class PurchaseOrderService {
-
     public static async getAllPurchaseOrders(): Promise<PurchaseOrder[]> {
         try {
             return await PurchaseOrderRepository.findAll();
@@ -20,7 +19,6 @@ export class PurchaseOrderService {
             throw new Error(`Error finding purchase order: ${error.message}`);
         }
     }
-
 
     public static async addPurchaseOrder(purchaseOrder: PurchaseOrder): Promise<PurchaseOrder> {
         try {
@@ -39,31 +37,10 @@ export class PurchaseOrderService {
             if (!purchaseOrderFound) {
                 throw new Error(`Purchase order with ID ${purchaseOrder_id} not found.`);
             }
-            if (purchaseOrderData.date !== undefined) {
-                purchaseOrderFound.date = purchaseOrderData.date;
-            }
-            if (purchaseOrderData.total !== undefined) {
-                purchaseOrderFound.total = purchaseOrderData.total;
-            }
-            if (purchaseOrderData.user_id_fk !== undefined) {
-                purchaseOrderFound.user_id_fk = purchaseOrderData.user_id_fk;
-            }
-            if (purchaseOrderData.street !== undefined) {
-                purchaseOrderFound.street = purchaseOrderData.street;
-            }
-            if (purchaseOrderData.city !== undefined) {
-                purchaseOrderFound.city = purchaseOrderData.city;
-            }
-            if (purchaseOrderData.status_id_fk !== undefined) {
-                purchaseOrderFound.status_id_fk = purchaseOrderData.status_id_fk;
-            }
-            if (purchaseOrderData.updated_by !== undefined) {
-                purchaseOrderFound.updated_by = purchaseOrderData.updated_by;
-            }
+
+            // Update fields if provided
+            Object.assign(purchaseOrderFound, purchaseOrderData);
             purchaseOrderFound.updated_at = DateUtils.formatDate(new Date());
-            if (purchaseOrderData.deleted !== undefined) {
-                purchaseOrderFound.deleted = purchaseOrderData.deleted;
-            }
 
             return await PurchaseOrderRepository.updatePurchaseOrder(purchaseOrder_id, purchaseOrderFound);
         } catch (error: any) {
@@ -86,4 +63,42 @@ export class PurchaseOrderService {
             throw new Error(`Error logically deleting purchase order: ${error.message}`);
         }
     }
+
+    public static async handlePayPalWebhook(req: Request, res: Response): Promise<Response> {
+        try {
+            const webhookEvent = req.body;
+
+            // Validar el webhook event con PayPal aquí (por seguridad)
+
+            if (webhookEvent.event_type === 'PAYMENT.SALE.COMPLETED') {
+                const { sale_id, transaction_id } = webhookEvent.resource;
+                const receipt = `PayPal Receipt - Sale ID: ${sale_id}, Transaction ID: ${transaction_id}`;
+                await PurchaseOrderService.updatePurchaseOrderByReceipt(receipt, sale_id);
+            }
+
+            return res.status(200).json({ message: 'Webhook received and processed' });
+        } catch (error: any) {
+            return res.status(500).json({ message: `Error handling PayPal webhook: ${error.message}` });
+        }   
+    }
+
+    public static async updatePurchaseOrderByReceipt(receipt: string, sale_id: string): Promise<PurchaseOrder | null> {
+        try {
+            const purchaseOrder = await PurchaseOrderRepository.findBySaleId(sale_id);
+            if (!purchaseOrder) {
+                throw new Error(`Purchase order with Sale ID ${sale_id} not found.`);
+            }
+            
+            if (purchaseOrder.purchaseOrder_id === null) {
+                throw new Error('Purchase order ID is null.');
+            }
+    
+            purchaseOrder.receipt = receipt;
+            purchaseOrder.updated_at = DateUtils.formatDate(new Date());
+            return await PurchaseOrderRepository.updatePurchaseOrder(purchaseOrder.purchaseOrder_id, purchaseOrder);
+        } catch (error: any) {
+            throw new Error(`Error updating purchase order by receipt: ${error.message}`);
+        }
+    }
+    
 }

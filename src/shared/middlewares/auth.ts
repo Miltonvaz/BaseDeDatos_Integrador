@@ -12,7 +12,6 @@ const errorMessages = {
   tokenExpired: 'Token expired',
   unauthorized: 'Unauthorized access'
 };
-
 export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
   const token = req.header('Authorization')?.replace('Bearer ', '');
 
@@ -42,10 +41,10 @@ export const authMiddleware = async (req: AuthRequest, res: Response, next: Next
     return res.status(401).json({ message: errorMessages.unauthorized });
   }
 };
+
 export const authorizeRole = (allowedRoles: string[]) => {
   return async (req: AuthRequest, res: Response, next: NextFunction) => {
     if (!req.userData) {
-      console.log('User data not found in request');
       return res.status(401).json({ message: errorMessages.unauthorized });
     }
 
@@ -53,26 +52,21 @@ export const authorizeRole = (allowedRoles: string[]) => {
       const user = await UserRepository.findById(req.userData.user_id);
 
       if (!user) {
-        console.log('User not found for ID:', req.userData.user_id);
         return res.status(401).json({ message: errorMessages.unauthorized });
       }
 
       const userRoleName = getUserRoleName(user.role_id_fk);
 
       if (!userRoleName) {
-        console.log('Invalid user role:', user.role_id_fk);
         return res.status(403).json({ message: 'Forbidden' });
       }
 
       if (!allowedRoles.includes(userRoleName)) {
-        console.log('User role:', userRoleName, 'Allowed roles:', allowedRoles);
         return res.status(403).json({ message: 'Forbidden' });
       }
 
-      console.log('Authorization successful for role:', userRoleName);
       return next();
     } catch (error) {
-      console.log('Authorization error:', error);
       return res.status(401).json({ message: errorMessages.unauthorized });
     }
   };

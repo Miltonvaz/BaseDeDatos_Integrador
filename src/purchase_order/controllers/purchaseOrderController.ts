@@ -27,10 +27,25 @@ export const getPurchaseOrderById = async (req: Request, res: Response): Promise
         return res.status(500).json({ message: `Error finding purchase order: ${error.message}` });
     }
 };
-
-export const createPurchaseOrder = [authorizeRole(['Administrador', 'Empleado', 'Usuario']), async (req: Request, res: Response): Promise<Response> => {
+export const handlePayPalWebhook = async (req: Request, res: Response): Promise<Response> => {
     try {
-        const { products, user_id_fk, street, city } = req.body;
+        const webhookEvent = req.body;
+
+        if (webhookEvent.event_type === 'PAYMENT.SALE.COMPLETED') {
+            const { sale_id, transaction_id } = webhookEvent.resource;
+            const receipt = `PayPal Receipt - Sale ID: ${sale_id}, Transaction ID: ${transaction_id}`;
+            await PurchaseOrderService. updatePurchaseOrderByReceipt(receipt, sale_id);
+        }
+
+        return res.status(200).json({ message: 'Webhook received and processed' });
+    } catch (error: any) {
+        return res.status(500).json({ message: `Error handling PayPal webhook: ${error.message}` });
+    }
+};
+
+export const createPurchaseOrder = async (req: Request, res: Response): Promise<Response> => {
+    try {
+        const { products, user_id_fk, street, city ,receipt} = req.body;
 
         if (!Array.isArray(products) || products.length === 0) {
             return res.status(400).json({ message: 'Invalid or empty products array' });
@@ -43,6 +58,7 @@ export const createPurchaseOrder = [authorizeRole(['Administrador', 'Empleado', 
         if (typeof street !== 'string' || street.trim() === '') {
             return res.status(400).json({ message: 'Invalid street' });
         }
+
         if (typeof city !== 'string' || city.trim() === '') {
             return res.status(400).json({ message: 'Invalid city' });
         }
@@ -59,11 +75,7 @@ export const createPurchaseOrder = [authorizeRole(['Administrador', 'Empleado', 
             total += productData.price * product.cantidad;
         });
 
-        try {
-            await Promise.all(productPromises);
-        } catch (error: any) {
-            return res.status(404).json({ message: error.message });
-        }
+        await Promise.all(productPromises);
 
         if (typeof total !== 'number' || isNaN(total) || !isFinite(total)) {
             return res.status(400).json({ message: 'Invalid total amount' });
@@ -84,6 +96,7 @@ export const createPurchaseOrder = [authorizeRole(['Administrador', 'Empleado', 
             created_at: DateUtils.formatDate(new Date()),
             updated_at: DateUtils.formatDate(new Date()),
             deleted: false,
+            receipt: receipt || null
         };
 
         const createdPurchaseOrder = await PurchaseOrderService.addPurchaseOrder(newPurchaseOrder);
@@ -92,7 +105,7 @@ export const createPurchaseOrder = [authorizeRole(['Administrador', 'Empleado', 
     } catch (error: any) {
         return res.status(500).json({ message: `Error creating purchase order: ${error.message}` });
     }
-}];
+};
 
 export const updatePurchaseOrder = [authorizeRole(['Administrador', 'Empleado']), async (req: Request, res: Response): Promise<Response> => {
     const { purchaseOrder_id } = req.params;
@@ -153,6 +166,7 @@ export const updatePurchaseOrder = [authorizeRole(['Administrador', 'Empleado'])
             updated_at: DateUtils.formatDate(new Date()),
             updated_by: updated_by || 'API',
             deleted: deleted !== undefined ? deleted : existingPurchaseOrder.deleted
+            
         };
 
         const updatedPurchaseOrder = await PurchaseOrderService.updatePurchaseOrder(Number(purchaseOrder_id), updatedPurchaseOrderData);
@@ -189,3 +203,4 @@ export const deletePurchaseOrderLogic = [authorizeRole(['Administrador', 'Emplea
         return res.status(500).json({ message: `Error logically deleting purchase order: ${error.message}` });
     }
 }];
+

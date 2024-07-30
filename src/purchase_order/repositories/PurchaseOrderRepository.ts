@@ -3,41 +3,35 @@ import connection from "../../shared/config/database";
 import { PurchaseOrder } from "../models/PurchaseOrder";
 
 export class PurchaseOrderRepository {
-
     public static async findAll(): Promise<PurchaseOrder[]> {
-        const query = "SELECT * FROM purchaseorder";
+        const query = "SELECT * FROM purchaseorder WHERE deleted = 0";
         return new Promise((resolve, reject) => {
             connection.query(query, (error, results) => {
                 if (error) {
                     reject(error);
                 } else {
-                    const purchaseOrders: PurchaseOrder[] = results as PurchaseOrder[];
-                    resolve(purchaseOrders);
+                    resolve(results as PurchaseOrder[]);
                 }
             });
         });
     }
 
     public static async findById(purchaseOrder_id: number): Promise<PurchaseOrder | null> {
-        const query = "SELECT * FROM purchaseorder WHERE purchaseOrder_id = ?";
+        const query = "SELECT * FROM purchaseorder WHERE purchaseOrder_id = ? AND deleted = 0";
         return new Promise((resolve, reject) => {
             connection.query(query, [purchaseOrder_id], (error, results) => {
                 if (error) {
                     reject(error);
                 } else {
                     const purchaseOrders: PurchaseOrder[] = results as PurchaseOrder[];
-                    if (purchaseOrders.length > 0) {
-                        resolve(purchaseOrders[0]);
-                    } else {
-                        resolve(null);
-                    }
+                    resolve(purchaseOrders.length > 0 ? purchaseOrders[0] : null);
                 }
             });
         });
     }
 
     public static async createPurchaseOrder(purchaseOrder: PurchaseOrder): Promise<PurchaseOrder> {
-        const query = 'INSERT INTO purchaseorder (date, total, product_id_fk, user_id_fk, street, city, status_id_fk, cantidad, created_at, created_by, updated_at, updated_by, deleted) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
+        const query = 'INSERT INTO purchaseorder (date, total, product_id_fk, user_id_fk, street, city, status_id_fk, cantidad, created_at, created_by, updated_at, updated_by, deleted, receipt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
         const values = [
             purchaseOrder.date,
             purchaseOrder.total,
@@ -51,9 +45,9 @@ export class PurchaseOrderRepository {
             purchaseOrder.created_by,
             purchaseOrder.updated_at,
             purchaseOrder.updated_by,
-            purchaseOrder.deleted ? 1 : 0
+            purchaseOrder.deleted ? 1 : 0,
+            purchaseOrder.receipt || null
         ];
-
         return new Promise((resolve, reject) => {
             connection.beginTransaction((err) => {
                 if (err) {
@@ -70,7 +64,6 @@ export class PurchaseOrderRepository {
                         const createdPurchaseOrderId = (result as ResultSetHeader).insertId;
                         const createdPurchaseOrder: PurchaseOrder = { ...purchaseOrder, purchaseOrder_id: createdPurchaseOrderId };
 
-                        // Insertar en la tabla pivote product_purchaseorder
                         const pivotQuery = 'INSERT INTO product_purchaseorder (product_id, purchaseorder_id, cantidad) VALUES (?, ?, ?)';
                         const pivotValues = [
                             purchaseOrder.product_id_fk,
@@ -123,35 +116,11 @@ export class PurchaseOrderRepository {
                 if (error) {
                     reject(error);
                 } else {
-                    if ((result as any).affectedRows > 0) {
-                        const updatedPurchaseOrder: PurchaseOrder = { ...purchaseOrderData, purchaseOrder_id: purchaseOrder_id };
-                        resolve(updatedPurchaseOrder);
-                    } else {
-                        resolve(null);
-                    }
+                    resolve((result as ResultSetHeader).affectedRows > 0 ? { ...purchaseOrderData, purchaseOrder_id } : null);
                 }
             });
         });
     }
-
-    public static async deletePurchaseOrder(purchaseOrder_id: number): Promise<boolean> {
-        const query = 'DELETE FROM purchaseorder WHERE purchaseOrder_id = ?';
-        return new Promise((resolve, reject) => {
-            connection.query(query, [purchaseOrder_id], (error, result) => {
-                if (error) {
-                    reject(error);
-                } else {
-                    if ((result as ResultSetHeader).affectedRows > 0) {
-                        resolve(true);
-                    } else {
-                        resolve(false);
-                    }
-                }
-            });
-        });
-    }
-   
-    
     public static async getMostSoldProducts(): Promise<{ product_id: number, name: string, total_sold: number }[]> {
         const query = `
             SELECT p.product_id, p.name, SUM(po.cantidad) AS total_sold
@@ -209,18 +178,42 @@ export class PurchaseOrderRepository {
             });
         });
     }
-        public static async deletePurchaseOrderLogic(purchaseOrder_id: number): Promise<boolean> {
+    public static async deletePurchaseOrder(purchaseOrder_id: number): Promise<boolean> {
+        const query = 'DELETE FROM purchaseorder WHERE purchaseOrder_id = ?';
+        return new Promise((resolve, reject) => {
+            connection.query(query, [purchaseOrder_id], (error, result) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve((result as ResultSetHeader).affectedRows > 0);
+                }
+            });
+        });
+    }
+
+    public static async deletePurchaseOrderLogic(purchaseOrder_id: number): Promise<boolean> {
         const query = 'UPDATE purchaseorder SET deleted = 1 WHERE purchaseOrder_id = ?';
         return new Promise((resolve, reject) => {
             connection.query(query, [purchaseOrder_id], (error, result) => {
                 if (error) {
                     reject(error);
                 } else {
-                    if ((result as ResultSetHeader).affectedRows > 0) {
-                        resolve(true);
-                    } else {
-                        resolve(false);
-                    }
+                    resolve((result as ResultSetHeader).affectedRows > 0);
+                }
+            });
+        });
+    }
+    
+
+    public static async findBySaleId(sale_id: string): Promise<PurchaseOrder | null> {
+        const query = "SELECT * FROM purchaseorder WHERE receipt LIKE ? AND deleted = 0";
+        return new Promise((resolve, reject) => {
+            connection.query(query, [`%${sale_id}%`], (error, results) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    const purchaseOrders: PurchaseOrder[] = results as PurchaseOrder[];
+                    resolve(purchaseOrders.length > 0 ? purchaseOrders[0] : null);
                 }
             });
         });
