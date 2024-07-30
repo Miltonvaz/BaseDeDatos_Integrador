@@ -148,7 +148,6 @@ export class PurchaseOrderRepository {
                         if (typeof row === 'object' && row !== null) {
                             const { product_id, name, total_sold } = row;
     
-                            // Convert total_sold to number
                             const totalSoldNumber = Number(total_sold);
     
                             if (typeof product_id === 'number' && !isNaN(product_id) &&

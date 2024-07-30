@@ -8,7 +8,7 @@ const purchaseOrderRoutes: Router = Router();
 purchaseOrderRoutes.put('/deleted/:purchaseOrder_id', authMiddleware, authorizeRole(['Administrador', 'Empleado']), deletePurchaseOrderLogic); 
 purchaseOrderRoutes.get('/', authMiddleware, getAllPurchaseOrders); 
 purchaseOrderRoutes.get('/:purchaseOrder_id', authMiddleware, getPurchaseOrderById);
-purchaseOrderRoutes.post('/',createPurchaseOrder);
+purchaseOrderRoutes.post('/', authMiddleware, createPurchaseOrder);
 purchaseOrderRoutes.put('/:purchaseOrder_id', authMiddleware, authorizeRole(['Administrador', 'Empleado']), updatePurchaseOrder); 
 purchaseOrderRoutes.delete('/:purchaseOrder_id', authMiddleware, authorizeRole(['Administrador', 'Empleado']), deletePurchaseOrder); 
 

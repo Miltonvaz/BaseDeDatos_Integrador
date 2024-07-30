@@ -37,8 +37,6 @@ export class PurchaseOrderService {
             if (!purchaseOrderFound) {
                 throw new Error(`Purchase order with ID ${purchaseOrder_id} not found.`);
             }
-
-            // Update fields if provided
             Object.assign(purchaseOrderFound, purchaseOrderData);
             purchaseOrderFound.updated_at = DateUtils.formatDate(new Date());
 
@@ -67,8 +65,6 @@ export class PurchaseOrderService {
     public static async handlePayPalWebhook(req: Request, res: Response): Promise<Response> {
         try {
             const webhookEvent = req.body;
-
-            // Validar el webhook event con PayPal aquí (por seguridad)
 
             if (webhookEvent.event_type === 'PAYMENT.SALE.COMPLETED') {
                 const { sale_id, transaction_id } = webhookEvent.resource;
